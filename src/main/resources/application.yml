@@ -1,1 +1,49 @@
-spring.application.name=quizbattle
+server:
+  port: 8080
+
+spring:
+
+  application:
+    name: quizbattle
+
+  datasource:
+    url: jdbc:postgresql://localhost:2445/quizbattle
+    username: postgres
+    password: Samgangji@24
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 60000
+
+logging:
+  level:
+    root: INFO
+    org.springframework.security: DEBUG
+
+firebase:
+  service-account-path: firebase-service-account.json
+
+app:
+  matchmaking:
+    queue-prefix: "matchmaking:subject:"
+  leaderboard:
+    prefix: "leaderboard:subject:"
