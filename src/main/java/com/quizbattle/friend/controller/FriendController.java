@@ -1,5 +1,7 @@
 package com.quizbattle.friend.controller;
 
+import com.quizbattle.common.dto.ApiResponse;
+import com.quizbattle.friend.dto.FriendResponseDTO;
 import com.quizbattle.friend.entity.Friend;
 import com.quizbattle.friend.service.FriendService;
 
@@ -34,57 +36,75 @@ public class FriendController {
 
     // 🔥 Send friend request
     @PostMapping("/request/{receiverId}")
-    public Friend sendFriendRequest(
+    public ApiResponse<FriendResponseDTO> sendFriendRequest(
             @PathVariable UUID receiverId
     ) {
 
-        User currentUser =
-                userService.getCurrentUser();
+        User currentUser = userService.getCurrentUser();
 
-        return friendService
-                .sendFriendRequest(currentUser, receiverId);
+        Friend friend =
+                friendService.sendFriendRequest(currentUser, receiverId);
+
+        return ApiResponse.success(toDTO(friend));
     }
 
 
 
     // 🔥 Accept request
     @PostMapping("/accept/{requestId}")
-    public Friend acceptRequest(
+    public ApiResponse<FriendResponseDTO> acceptRequest(
             @PathVariable UUID requestId
     ) {
 
-        User currentUser =
-                userService.getCurrentUser();
+        User currentUser = userService.getCurrentUser();
 
-        return friendService
-                .acceptFriendRequest(requestId, currentUser);
+        Friend friend =
+                friendService.acceptFriendRequest(requestId, currentUser);
+
+        return ApiResponse.success(toDTO(friend));
     }
 
 
 
     // 🔥 Reject request
     @PostMapping("/reject/{requestId}")
-    public Friend rejectRequest(
+    public ApiResponse<FriendResponseDTO> rejectRequest(
             @PathVariable UUID requestId
     ) {
 
-        User currentUser =
-                userService.getCurrentUser();
+        User currentUser = userService.getCurrentUser();
 
-        return friendService
-                .rejectFriendRequest(requestId, currentUser);
+        Friend friend =
+                friendService.rejectFriendRequest(requestId, currentUser);
+
+        return ApiResponse.success(toDTO(friend));
     }
 
 
 
     // 🔥 List friends
     @GetMapping
-    public List<Friend> listFriends() {
+    public ApiResponse<List<FriendResponseDTO>> listFriends() {
 
-        User currentUser =
-                userService.getCurrentUser();
+        User currentUser = userService.getCurrentUser();
 
-        return friendService.listFriends(currentUser);
+        List<FriendResponseDTO> result =
+                friendService.listFriends(currentUser)
+                        .stream()
+                        .map(this::toDTO)
+                        .toList();
+
+        return ApiResponse.success(result);
+    }
+
+    private FriendResponseDTO toDTO(Friend friend) {
+        return new FriendResponseDTO(
+                friend.getId(),
+                friend.getSender().getId(),
+                friend.getReceiver().getId(),
+                friend.getStatus(),
+                friend.getCreatedAt()
+        );
     }
 
 }

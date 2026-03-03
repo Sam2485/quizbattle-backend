@@ -1,5 +1,7 @@
 package com.quizbattle.leaderboard.controller;
 
+import com.quizbattle.common.dto.ApiResponse;
+import com.quizbattle.leaderboard.dto.LeaderboardEntryDTO;
 import com.quizbattle.leaderboard.service.LeaderboardService;
 
 import com.quizbattle.user.entity.User;
@@ -7,6 +9,7 @@ import com.quizbattle.user.service.UserService;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,29 +34,36 @@ public class LeaderboardController {
 
 
 
-    // 🔥 Get top N players for subject
-    @GetMapping("/{subjectId}/top")
-    public Set<String> getTopPlayers(
+    @GetMapping("/{subjectId}")
+    public ApiResponse<List<LeaderboardEntryDTO>> getLeaderboard(
             @PathVariable UUID subjectId,
-            @RequestParam(defaultValue = "10") int limit
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
 
-        return leaderboardService
-                .getTopPlayers(subjectId, limit);
+        return ApiResponse.success(
+                leaderboardService.getLeaderboardPage(
+                        subjectId,
+                        page,
+                        size
+                )
+        );
     }
 
 
 
     // 🔥 Get current user rank
     @GetMapping("/{subjectId}/rank")
-    public Long getMyRank(
+    public ApiResponse<Long> getMyRank(
             @PathVariable UUID subjectId
     ) {
 
         User user = userService.getCurrentUser();
 
-        return leaderboardService
+        Long rank = leaderboardService
                 .getRank(subjectId, user.getId());
+
+        return ApiResponse.success(rank);
     }
 
 }

@@ -82,14 +82,14 @@ public class MatchController {
 
 
     @GetMapping("/{matchId}")
-    public MatchResponseDTO getMatch(
+    public ApiResponse<MatchResponseDTO> getMatch(
             @PathVariable UUID matchId
     ) {
 
         Match match =
-                matchService.startMatch(matchId);
+                matchService.getMatchById(matchId);
 
-        return toDTO(match);
+        return ApiResponse.success(toDTO(match));
     }
 
 

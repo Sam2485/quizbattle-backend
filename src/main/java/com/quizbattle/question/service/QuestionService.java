@@ -6,6 +6,7 @@ import com.quizbattle.question.repository.QuestionRepository;
 
 import com.quizbattle.subject.entity.Subject;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,7 +47,10 @@ public class QuestionService {
     }
 
 
-
+    @Cacheable(
+            value = "questions",
+            key = "#subject.id + '-' + #rating + '-' + #count"
+    )
     public List<QuestionResponseDTO> getQuestionsForMatch(
             Subject subject,
             int rating,

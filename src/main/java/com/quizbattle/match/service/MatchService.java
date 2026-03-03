@@ -237,4 +237,9 @@ public class MatchService {
         matchRepository.save(match);
     }
 
+    public Match getMatchById(UUID matchId) {
+        return matchRepository
+                .findById(matchId)
+                .orElseThrow();
+    }
 }
