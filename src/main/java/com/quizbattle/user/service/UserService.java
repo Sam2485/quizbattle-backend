@@ -26,6 +26,7 @@ public class UserService {
     }
 
 
+
     @Transactional
     public User getOrCreateUser(FirebaseUser firebaseUser) {
 
@@ -40,7 +41,6 @@ public class UserService {
             user.setLastActive(Instant.now());
 
             return userRepository.save(user);
-
         }
 
 
@@ -51,11 +51,14 @@ public class UserService {
         );
 
         return userRepository.save(newUser);
-
     }
 
 
 
+    /**
+     * 🔥 UPDATED: Now auto-creates user if not found
+     */
+    @Transactional
     public User getCurrentUser() {
 
         Authentication authentication =
@@ -68,10 +71,6 @@ public class UserService {
         FirebaseUser firebaseUser =
                 (FirebaseUser) authentication.getPrincipal();
 
-        return userRepository
-                .findByFirebaseUid(firebaseUser.getUid())
-                .orElseThrow(() ->
-                        new RuntimeException("User not found in database"));
+        return getOrCreateUser(firebaseUser);
     }
-
 }
