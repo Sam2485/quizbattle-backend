@@ -1,5 +1,8 @@
 package com.quizbattle.match.controller;
 
+import com.quizbattle.common.dto.ApiResponse;
+import com.quizbattle.match.dto.MatchResponseDTO;
+import com.quizbattle.match.dto.SubmitAnswerRequestDTO;
 import com.quizbattle.match.entity.Match;
 import com.quizbattle.match.service.MatchService;
 
@@ -8,6 +11,8 @@ import com.quizbattle.question.repository.QuestionRepository;
 
 import com.quizbattle.user.entity.User;
 import com.quizbattle.user.service.UserService;
+
+import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -37,53 +42,71 @@ public class MatchController {
 
 
 
-    // 🔥 Start match
     @PostMapping("/{matchId}/start")
-    public Match startMatch(
+    public ApiResponse<MatchResponseDTO> startMatch(
             @PathVariable UUID matchId
     ) {
 
-        return matchService.startMatch(matchId);
+        Match match = matchService.startMatch(matchId);
+
+        return ApiResponse.success(toDTO(match));
     }
 
 
 
-    // 🔥 Submit answer
     @PostMapping("/{matchId}/answer")
-    public Match submitAnswer(
+    public ApiResponse<MatchResponseDTO> submitAnswer(
             @PathVariable UUID matchId,
-            @RequestParam UUID questionId,
-            @RequestParam String answer,
-            @RequestParam Long timeTakenMs
+            @Valid @RequestBody SubmitAnswerRequestDTO request
     ) {
 
         User user = userService.getCurrentUser();
 
         Question question =
                 questionRepository
-                        .findById(questionId)
+                        .findById(request.getQuestionId())
                         .orElseThrow();
 
+        Match match =
+                matchService.submitAnswer(
+                        matchId,
+                        user,
+                        question,
+                        request.getAnswer(),
+                        request.getTimeTakenMs()
+                );
 
-        return matchService.submitAnswer(
-                matchId,
-                user,
-                question,
-                answer,
-                timeTakenMs
-        );
+        return ApiResponse.success(toDTO(match));
     }
 
 
 
-    // 🔥 Get match details
     @GetMapping("/{matchId}")
-    public Match getMatch(
+    public MatchResponseDTO getMatch(
             @PathVariable UUID matchId
     ) {
 
-        return matchService
-                .startMatch(matchId); // simple fetch (can improve later)
+        Match match =
+                matchService.startMatch(matchId);
+
+        return toDTO(match);
+    }
+
+
+
+    private MatchResponseDTO toDTO(Match match) {
+
+        return new MatchResponseDTO(
+                match.getId(),
+                match.getPlayer1().getId(),
+                match.getPlayer2().getId(),
+                match.getWinner() != null
+                        ? match.getWinner().getId()
+                        : null,
+                match.getStatus(),
+                match.getStartedAt(),
+                match.getFinishedAt()
+        );
     }
 
 }

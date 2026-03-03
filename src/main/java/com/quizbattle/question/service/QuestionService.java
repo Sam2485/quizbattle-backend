@@ -1,5 +1,6 @@
 package com.quizbattle.question.service;
 
+import com.quizbattle.question.dto.QuestionResponseDTO;
 import com.quizbattle.question.entity.Question;
 import com.quizbattle.question.repository.QuestionRepository;
 
@@ -46,7 +47,7 @@ public class QuestionService {
 
 
 
-    public List<Question> getQuestionsForMatch(
+    public List<QuestionResponseDTO> getQuestionsForMatch(
             Subject subject,
             int rating,
             int count
@@ -55,14 +56,16 @@ public class QuestionService {
         String difficulty =
                 getDifficultyFromRating(rating);
 
-
-        return questionRepository
-                .findRandomQuestions(
+        List<Question> questions =
+                questionRepository.findRandomQuestions(
                         subject.getId(),
                         difficulty,
                         count
                 );
 
+        return questions.stream()
+                .map(this::toDTO)
+                .toList();
     }
 
 
@@ -93,6 +96,19 @@ public class QuestionService {
 
         return question.getAnswerDescription();
 
+    }
+
+    public QuestionResponseDTO toDTO(Question question) {
+
+        return new QuestionResponseDTO(
+                question.getId(),
+                question.getQuestionTitle(),
+                question.getOption1(),
+                question.getOption2(),
+                question.getOption3(),
+                question.getOption4(),
+                question.getDifficultyLevel()
+        );
     }
 
 }
